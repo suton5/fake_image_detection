@@ -1,2 +1,3 @@
-checkpoints/
+gan/training_checkpoints/
+gan/training_checkpoints.zip
 data/
