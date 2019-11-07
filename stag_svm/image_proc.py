@@ -109,9 +109,10 @@ def LoadImage(image_path, name="none", shouldDisplay=False):
 	return image
 
 # NOTE: for now, compute only for single channel - req by skimage.feature api
-def ComputeCoOccurence(res_image):
-	#return greycomatrix(res_image[0], GLCM_STRIDE, GLCM_DIR)
-	return Normalize(res_image)
+def ComputeCoOccurrance(res_image):
+	res_image_int = res_image[0].astype(np.uint8)
+	return greycomatrix(res_image_int, GLCM_STRIDE, GLCM_DIR)
+	#return Normalize(res_image)
 
 def ProcessImage(image, mask, name="", shouldDisplay=False):
 	assert not IsImageNone(image), "Image to process is None"
@@ -119,7 +120,7 @@ def ProcessImage(image, mask, name="", shouldDisplay=False):
 	if (not IsImageNone(mask)): image = cv.bitwise_and(image, image, mask = mask)
 
 	res = ComputeResidualImage(image, name)
-	global_feature = ComputeCoOccurence(res)
+	global_feature = ComputeCoOccurrance(res)
 
 	#scaler = MinMaxScaler(feature_range=(0, 1))
 	#Normalize The feature vectors...
@@ -132,7 +133,7 @@ def ProcessImage(image, mask, name="", shouldDisplay=False):
 		plt.title(name)
 		plt.subplot(2,2,3), plt.imshow(Normalize(res))
 		plt.title("{0}_{1}".format(name, f_choice))
-		plt.subplot(2,2,4), plt.imshow((global_feature))
+		plt.subplot(2,2,4), plt.imshow((global_feature[:,:,0,0]))
 		plt.title("{0}_{1}".format(name, "co_occur"))
 		plt.show()
 
@@ -190,7 +191,8 @@ def ProcessAllFrames(frames_path, mask_path):
 			## Log some stats and save intermediate results (TO RM)
 			if (not IsImageNone(features)):
 				log_file.write("{0}, {1}, {2}, {3}".format(frame_file.replace(FRAME_FILE_EXT, ""), features.max(), features.mean(), features.min()))
-				cv.imwrite(os.path.join(frames_path, frame_file.replace(FRAME_FILE_EXT, outpostfix + FRAME_FILE_EXT)), features)
+				# TODO: need to convert p array to cv mat
+				#cv.imwrite(os.path.join(frames_path, frame_file.replace(FRAME_FILE_EXT, outpostfix + FRAME_FILE_EXT)), features)
 			else:
 				print("Failed to process real/fake frame '{}'".format(frame))
 				return []	
